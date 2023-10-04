@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/mux" // Import Gorilla Mux
+	"github.com/gorilla/mux"
 )
 
 const version = "1.0.0"
@@ -36,10 +36,8 @@ func main() {
 		Logger: logger,
 	}
 
-	// Create a Gorilla Mux router
 	r := mux.NewRouter()
 
-	// Register the /v1/healthcheck route using Gorilla Mux
 	r.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
 
 	srv := &http.Server{
