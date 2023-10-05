@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 const version = "1.0.0"
@@ -36,13 +34,9 @@ func main() {
 		Logger: logger,
 	}
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
-
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      r, // Set the router as the handler
+		Handler:      app.routes(), // Set the router as the handler
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
