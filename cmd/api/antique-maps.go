@@ -30,7 +30,7 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 		Type:      "Exploration Map",
 		Version:   1,
 	}
-	err = app.writeJSON(w, http.StatusOK, maps, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"maps": maps}, nil)
 	if err != nil {
 		app.Logger.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
