@@ -15,7 +15,7 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 
 	id, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 	//fmt.Fprintf(w, "show the details of antique map %d\n", id)
@@ -32,8 +32,7 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"maps": maps}, nil)
 	if err != nil {
-		app.Logger.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 
 }
