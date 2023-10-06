@@ -9,11 +9,11 @@ import (
 
 func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title     string `json:"title"`
-		Year      int32  `json:"year"`
-		Country   string `json:"country"`
-		Condition string `json:"condition"`
-		Type      string `json:"type"`
+		Title     string    `json:"title"`
+		Year      data.Year `json:"year"`
+		Country   string    `json:"country"`
+		Condition string    `json:"condition"`
+		Type      string    `json:"type"`
 	}
 
 	err := app.readJSON(w, r, &input)
