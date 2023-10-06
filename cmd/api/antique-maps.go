@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"maps.alexedwards.net/internal/data"
 	"net/http"
@@ -17,7 +16,7 @@ func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.R
 		Type      string `json:"type"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
