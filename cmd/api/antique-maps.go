@@ -24,8 +24,11 @@ func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.R
 	}
 
 	maps := &data.Maps{
-		Title: input.Title,
-		Year:  input.Year,
+		Title:     input.Title,
+		Year:      input.Year,
+		Country:   input.Country,
+		Condition: input.Condition,
+		Type:      input.Type,
 	}
 	// Initialize a new Validator.
 	v := validator.New()
