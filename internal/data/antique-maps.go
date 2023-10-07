@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Maps struct {
+type AntiqueMaps struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"-"`
 	Title     string    `json:"title"`
@@ -16,10 +16,10 @@ type Maps struct {
 	Version   int32     `json:"version"`
 }
 
-func ValidateMaps(v *validator.Validator, maps *Maps) {
-	v.Check(maps.Title != "", "title", "must be provided")
-	v.Check(len(maps.Title) <= 500, "title", "must not be more than 500 bytes long")
-	v.Check(maps.Year != 0, "year", "must be provided")
-	v.Check(maps.Year >= 1, "year", "must be greater than 1888")
+func ValidateAntiqueMaps(v *validator.Validator, antiqueMaps *AntiqueMaps) {
+	v.Check(antiqueMaps.Title != "", "title", "must be provided")
+	v.Check(len(antiqueMaps.Title) <= 500, "title", "must not be more than 500 bytes long")
+	v.Check(antiqueMaps.Year != 0, "year", "must be provided")
+	v.Check(antiqueMaps.Year >= 1, "year", "must be greater than 1888")
 
 }

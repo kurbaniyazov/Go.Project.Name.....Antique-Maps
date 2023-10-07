@@ -23,7 +23,7 @@ func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	maps := &data.Maps{
+	antiqueMaps := &data.AntiqueMaps{
 		Title:     input.Title,
 		Year:      input.Year,
 		Country:   input.Country,
@@ -34,7 +34,7 @@ func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.R
 	v := validator.New()
 	// Call the ValidateMovie() function and return a response containing the errors if
 	// any of the checks fail.
-	if data.ValidateMaps(v, maps); !v.Valid() {
+	if data.ValidateAntiqueMaps(v, antiqueMaps); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
@@ -50,7 +50,7 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 	}
 	//fmt.Fprintf(w, "show the details of antique map %d\n", id)
 
-	maps := data.Maps{
+	antiqueMaps := &data.AntiqueMaps{
 		ID:        id,
 		CreatedAt: time.Now(),
 		Title:     "Italy Map",
@@ -61,7 +61,7 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 		Version:   1,
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"maps": maps}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"antiqueMaps": antiqueMaps}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
