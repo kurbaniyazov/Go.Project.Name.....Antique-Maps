@@ -33,8 +33,7 @@ func main() {
 	flag.IntVar(&cfg.Port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.Env, "env", "development", "Environment (development|staging|production)")
 
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://maps:pa55word@localhost/maps?sslmode=disable", "PostgreSQL DSN")
-
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("MAPS_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
@@ -65,8 +64,7 @@ func main() {
 	logger.Fatal(err)
 }
 func openDB(cfg config) (*sql.DB, error) {
-	// Use sql.Open() to create an empty connection pool, using the DSN from the config
-	// struct.
+
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
 		return nil, err
