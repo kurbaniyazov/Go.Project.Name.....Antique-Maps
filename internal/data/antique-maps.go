@@ -25,19 +25,28 @@ func ValidateAntiqueMaps(v *validator.Validator, antiqueMaps *AntiqueMaps) {
 
 }
 
-type MapsModel struct {
+func (a AntiqueMapsModel) Insert(antiqueMaps *AntiqueMaps) error {
+
+	query := `
+		INSERT INTO antiquemaps (title, year, country, condition, type)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, created_at, version`
+
+	args := []interface{}{antiqueMaps.Title, antiqueMaps.Year, antiqueMaps.Country, antiqueMaps.Condition, antiqueMaps.Type}
+
+	return a.DB.QueryRow(query, args...).Scan(&antiqueMaps.ID, &antiqueMaps.CreatedAt, &antiqueMaps.Version)
+}
+
+type AntiqueMapsModel struct {
 	DB *sql.DB
 }
 
-func (m MapsModel) Insert(antiqueMaps *AntiqueMaps) error {
-	return nil
-}
-func (m MapsModel) Get(id int64) (*AntiqueMaps, error) {
+func (a AntiqueMapsModel) Get(id int64) (*AntiqueMaps, error) {
 	return nil, nil
 }
-func (m MapsModel) Update(antiqueMaps *AntiqueMaps) error {
+func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 	return nil
 }
-func (m MapsModel) Delete(id int64) error {
+func (a AntiqueMapsModel) Delete(id int64) error {
 	return nil
 }

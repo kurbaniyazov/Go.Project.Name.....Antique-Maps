@@ -30,15 +30,26 @@ func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.R
 		Condition: input.Condition,
 		Type:      input.Type,
 	}
-	// Initialize a new Validator.
+
 	v := validator.New()
-	// Call the ValidateMovie() function and return a response containing the errors if
-	// any of the checks fail.
+
 	if data.ValidateAntiqueMaps(v, antiqueMaps); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	fmt.Fprintf(w, "%+v\n", input)
+	err = app.models.AntiqueMaps.Insert(antiqueMaps)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/antique-maps/%d", antiqueMaps.ID))
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"antique map": antiqueMaps}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Request) {

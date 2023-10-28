@@ -10,11 +10,11 @@ var (
 )
 
 type Models struct {
-	Movies MapsModel
+	AntiqueMaps AntiqueMapsModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Movies: MapsModel{DB: db},
+		AntiqueMaps: AntiqueMapsModel{DB: db},
 	}
 }
