@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"maps.alexedwards.net/internal/validator"
 	"time"
 )
@@ -22,4 +23,21 @@ func ValidateAntiqueMaps(v *validator.Validator, antiqueMaps *AntiqueMaps) {
 	v.Check(antiqueMaps.Year != 0, "year", "must be provided")
 	v.Check(antiqueMaps.Year >= 1, "year", "must be greater than 1888")
 
+}
+
+type MapsModel struct {
+	DB *sql.DB
+}
+
+func (m MapsModel) Insert(antiqueMaps *AntiqueMaps) error {
+	return nil
+}
+func (m MapsModel) Get(id int64) (*AntiqueMaps, error) {
+	return nil, nil
+}
+func (m MapsModel) Update(antiqueMaps *AntiqueMaps) error {
+	return nil
+}
+func (m MapsModel) Delete(id int64) error {
+	return nil
 }
