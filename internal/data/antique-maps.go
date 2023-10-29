@@ -92,5 +92,26 @@ func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 	return a.DB.QueryRow(query, args...).Scan(&antiqueMaps.Version)
 }
 func (a AntiqueMapsModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	query := `
+		DELETE FROM antiqueMaps
+		WHERE id = $1`
+
+	result, err := a.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
 	return nil
 }
