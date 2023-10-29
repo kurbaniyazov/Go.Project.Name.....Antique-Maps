@@ -74,7 +74,22 @@ func (a AntiqueMapsModel) Get(id int64) (*AntiqueMaps, error) {
 	return &antiqueMaps, nil
 }
 func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
-	return nil
+	query := `
+		UPDATE antiqueMaps
+		SET title = $1, year = $2, country = $3, condition = $4, type = $5, version = version + 1
+		WHERE id = $6
+		RETURNING version`
+
+	args := []interface{}{
+		antiqueMaps.Title,
+		antiqueMaps.Year,
+		antiqueMaps.Country,
+		antiqueMaps.Condition,
+		antiqueMaps.Type,
+		antiqueMaps.ID,
+	}
+
+	return a.DB.QueryRow(query, args...).Scan(&antiqueMaps.Version)
 }
 func (a AntiqueMapsModel) Delete(id int64) error {
 	return nil
