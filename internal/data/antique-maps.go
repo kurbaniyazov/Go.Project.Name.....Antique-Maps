@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"maps.alexedwards.net/internal/validator"
 	"time"
 )
@@ -28,7 +29,7 @@ func ValidateAntiqueMaps(v *validator.Validator, antiqueMaps *AntiqueMaps) {
 func (a AntiqueMapsModel) Insert(antiqueMaps *AntiqueMaps) error {
 
 	query := `
-		INSERT INTO antiquemaps (title, year, country, condition, type)
+		INSERT INTO antiqueMaps (title, year, country, condition, type)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, version`
 
@@ -42,7 +43,35 @@ type AntiqueMapsModel struct {
 }
 
 func (a AntiqueMapsModel) Get(id int64) (*AntiqueMaps, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	query := `
+		SELECT id, created_at, title, year, country, condition, type, version
+		FROM antiqueMaps
+		WHERE id = $1`
+	var antiqueMaps AntiqueMaps
+
+	err := a.DB.QueryRow(query, id).Scan(
+		&antiqueMaps.ID,
+		&antiqueMaps.CreatedAt,
+		&antiqueMaps.Title,
+		&antiqueMaps.Year,
+		&antiqueMaps.Country,
+		&antiqueMaps.Condition,
+		&antiqueMaps.Type,
+		&antiqueMaps.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &antiqueMaps, nil
 }
 func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 	return nil

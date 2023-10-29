@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"maps.alexedwards.net/internal/data"
 	"maps.alexedwards.net/internal/validator"
 	"net/http"
-	"time"
 )
 
 func (app *application) createAntiqueMapHandler(w http.ResponseWriter, r *http.Request) {
@@ -61,18 +61,18 @@ func (app *application) showAntiqueMapHandler(w http.ResponseWriter, r *http.Req
 	}
 	//fmt.Fprintf(w, "show the details of antique map %d\n", id)
 
-	antiqueMaps := &data.AntiqueMaps{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Title:     "Italy Map",
-		Year:      1843,
-		Country:   "Italy",
-		Condition: "Well",
-		Type:      "Exploration Map",
-		Version:   1,
+	antiqueMap, err := app.models.AntiqueMaps.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"antiqueMaps": antiqueMaps}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"antiqueMaps": antiqueMap}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
