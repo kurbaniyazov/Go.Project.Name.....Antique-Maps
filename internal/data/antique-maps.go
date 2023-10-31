@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"maps.alexedwards.net/internal/validator"
 	"time"
 )
@@ -142,12 +143,13 @@ func (a AntiqueMapsModel) Delete(id int64) error {
 }
 
 func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) ([]*AntiqueMaps, error) {
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, created_at, title, year, country, condition, type, version
 		FROM antiqueMaps
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (LOWER(country) = LOWER($2) OR $2 = '')
-		ORDER BY id`
+		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
