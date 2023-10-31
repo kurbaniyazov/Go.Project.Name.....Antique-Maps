@@ -20,5 +20,5 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPatch, "/v1/antique-maps/:id", app.updateAntiqueMapsHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/antique-maps/:id", app.deleteAntiqueMapsHandler)
-	return app.recoverPanic(router)
+	return app.recoverPanic(app.rateLimit(router))
 }
