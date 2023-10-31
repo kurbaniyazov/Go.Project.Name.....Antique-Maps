@@ -148,12 +148,13 @@ func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) 
 		FROM antiqueMaps
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (LOWER(country) = LOWER($2) OR $2 = '')
-		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
-	rows, err := a.DB.QueryContext(ctx, query, title, country)
+	args := []interface{}{title, country, filters.limit(), filters.offset()}
+	rows, err := a.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
