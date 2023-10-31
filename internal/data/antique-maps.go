@@ -142,9 +142,9 @@ func (a AntiqueMapsModel) Delete(id int64) error {
 	return nil
 }
 
-func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) ([]*AntiqueMaps, error) {
+func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) ([]*AntiqueMaps, Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT id, created_at, title, year, country, condition, type, version
+		SELECT count(*) OVER(), id, created_at, title, year, country, condition, type, version
 		FROM antiqueMaps
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (LOWER(country) = LOWER($2) OR $2 = '')
@@ -153,17 +153,22 @@ func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) 
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
 	args := []interface{}{title, country, filters.limit(), filters.offset()}
 	rows, err := a.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
+
+	totalRecords := 0
 	antiqueMapss := []*AntiqueMaps{}
+
 	for rows.Next() {
 		var antiqueMaps AntiqueMaps
 		err := rows.Scan(
+			&totalRecords,
 			&antiqueMaps.ID,
 			&antiqueMaps.CreatedAt,
 			&antiqueMaps.Title,
@@ -174,13 +179,15 @@ func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) 
 			&antiqueMaps.Version,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		antiqueMapss = append(antiqueMapss, &antiqueMaps)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
-	return antiqueMapss, nil
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return antiqueMapss, metadata, nil
 }
