@@ -140,3 +140,42 @@ func (a AntiqueMapsModel) Delete(id int64) error {
 	}
 	return nil
 }
+
+func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) ([]*AntiqueMaps, error) {
+	query := `
+		SELECT id, created_at, title, year, country, condition, type, version
+		FROM antiqueMaps
+		ORDER BY id`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := a.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	antiqueMapss := []*AntiqueMaps{}
+	for rows.Next() {
+		var antiqueMaps AntiqueMaps
+		err := rows.Scan(
+			&antiqueMaps.ID,
+			&antiqueMaps.CreatedAt,
+			&antiqueMaps.Title,
+			&antiqueMaps.Year,
+			&antiqueMaps.Country,
+			&antiqueMaps.Condition,
+			&antiqueMaps.Type,
+			&antiqueMaps.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+		antiqueMapss = append(antiqueMapss, &antiqueMaps)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return antiqueMapss, nil
+}
