@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS antiquemaps_title_idx ON antiquemaps USING GIN (to_tsvector('simple', title));
+CREATE INDEX IF NOT EXISTS antiquemaps_country_idx ON antiquemaps USING GIN (to_tsvector('simple', country));
