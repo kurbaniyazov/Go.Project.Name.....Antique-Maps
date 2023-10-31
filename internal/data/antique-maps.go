@@ -77,7 +77,7 @@ func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 	query := `
 		UPDATE antiqueMaps
 		SET title = $1, year = $2, country = $3, condition = $4, type = $5, version = version + 1
-		WHERE id = $6
+		WHERE id = $6 AND version = $7
 		RETURNING version`
 
 	args := []interface{}{
@@ -87,9 +87,19 @@ func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 		antiqueMaps.Condition,
 		antiqueMaps.Type,
 		antiqueMaps.ID,
+		antiqueMaps.Version,
 	}
 
-	return a.DB.QueryRow(query, args...).Scan(&antiqueMaps.Version)
+	err := a.DB.QueryRow(query, args...).Scan(&antiqueMaps.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
 }
 func (a AntiqueMapsModel) Delete(id int64) error {
 	if id < 1 {
