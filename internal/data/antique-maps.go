@@ -145,11 +145,13 @@ func (a AntiqueMapsModel) GetAll(title string, country string, filters Filters) 
 	query := `
 		SELECT id, created_at, title, year, country, condition, type, version
 		FROM antiqueMaps
+		WHERE (LOWER(title) = LOWER($1) OR $1 = '')
+		AND (LOWER(country) = LOWER($2) OR $2 = '')
 		ORDER BY id`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := a.DB.QueryContext(ctx, query)
+	rows, err := a.DB.QueryContext(ctx, query, title, country)
 	if err != nil {
 		return nil, err
 	}
