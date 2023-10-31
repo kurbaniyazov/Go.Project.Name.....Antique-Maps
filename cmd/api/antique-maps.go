@@ -98,11 +98,11 @@ func (app *application) updateAntiqueMapsHandler(w http.ResponseWriter, r *http.
 
 	}
 	var input struct {
-		Title     string `json:"title"`
-		Year      int32  `json:"year"`
-		Country   string `json:"country"`
-		Condition string `json:"condition"`
-		Type      string `json:"type"`
+		Title     *string `json:"title"`
+		Year      *int32  `json:"year"`
+		Country   *string `json:"country"`
+		Condition *string `json:"condition"`
+		Type      *string `json:"type"`
 	}
 	err = app.readJSON(w, r, &input)
 	if err != nil {
@@ -110,24 +110,34 @@ func (app *application) updateAntiqueMapsHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	antiqueMaps.Title = input.Title
-	antiqueMaps.Year = input.Year
-	antiqueMaps.Country = input.Country
-	antiqueMaps.Condition = input.Condition
-	antiqueMaps.Type = input.Type
+	if input.Title != nil {
+		antiqueMaps.Title = *input.Title
+	}
+	if input.Year != nil {
+		antiqueMaps.Year = *input.Year
+	}
+	if input.Country != nil {
+		antiqueMaps.Country = *input.Country
+	}
+	if input.Condition != nil {
+		antiqueMaps.Condition = *input.Condition
+	}
+	if input.Type != nil {
+		antiqueMaps.Type = *input.Type
+	}
 
 	v := validator.New()
 	if data.ValidateAntiqueMaps(v, antiqueMaps); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Pass the updated movie record to our new Update() method.
+
 	err = app.models.AntiqueMaps.Update(antiqueMaps)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	// Write the updated movie record in a JSON response.
+
 	err = app.writeJSON(w, http.StatusOK, envelope{"antique maps": antiqueMaps}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

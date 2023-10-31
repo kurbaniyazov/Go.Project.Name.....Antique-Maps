@@ -15,7 +15,8 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/antique-maps", app.createAntiqueMapHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/antique-maps/:id", app.showAntiqueMapHandler)
-	router.HandlerFunc(http.MethodPut, "/v1/antique-maps/:id", app.updateAntiqueMapsHandler)
+
+	router.HandlerFunc(http.MethodPatch, "/v1/antique-maps/:id", app.updateAntiqueMapsHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/antique-maps/:id", app.deleteAntiqueMapsHandler)
 	return router
 }
