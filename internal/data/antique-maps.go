@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"maps.alexedwards.net/internal/validator"
@@ -35,7 +36,10 @@ func (a AntiqueMapsModel) Insert(antiqueMaps *AntiqueMaps) error {
 
 	args := []interface{}{antiqueMaps.Title, antiqueMaps.Year, antiqueMaps.Country, antiqueMaps.Condition, antiqueMaps.Type}
 
-	return a.DB.QueryRow(query, args...).Scan(&antiqueMaps.ID, &antiqueMaps.CreatedAt, &antiqueMaps.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return a.DB.QueryRowContext(ctx, query, args...).Scan(&antiqueMaps.ID, &antiqueMaps.CreatedAt, &antiqueMaps.Version)
 }
 
 type AntiqueMapsModel struct {
@@ -50,9 +54,14 @@ func (a AntiqueMapsModel) Get(id int64) (*AntiqueMaps, error) {
 		SELECT id, created_at, title, year, country, condition, type, version
 		FROM antiqueMaps
 		WHERE id = $1`
+
 	var antiqueMaps AntiqueMaps
 
-	err := a.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	err := a.DB.QueryRowContext(ctx, query, id).Scan(
 		&antiqueMaps.ID,
 		&antiqueMaps.CreatedAt,
 		&antiqueMaps.Title,
@@ -90,7 +99,10 @@ func (a AntiqueMapsModel) Update(antiqueMaps *AntiqueMaps) error {
 		antiqueMaps.Version,
 	}
 
-	err := a.DB.QueryRow(query, args...).Scan(&antiqueMaps.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := a.DB.QueryRowContext(ctx, query, args...).Scan(&antiqueMaps.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -110,7 +122,10 @@ func (a AntiqueMapsModel) Delete(id int64) error {
 		DELETE FROM antiqueMaps
 		WHERE id = $1`
 
-	result, err := a.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := a.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
