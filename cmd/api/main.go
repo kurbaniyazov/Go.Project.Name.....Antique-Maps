@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"maps.alexedwards.net/internal/data"
 	"maps.alexedwards.net/internal/jsonlog"
+	"maps.alexedwards.net/internal/mailer"
 
 	"flag"
 	"os"
@@ -28,19 +29,26 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	Config config
 	Logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
 	var cfg config
 	flag.IntVar(&cfg.Port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.Env, "env", "development", "Environment (development|staging|production)")
-
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("MAPS_DB_DSN"), "PostgreSQL DSN")
 
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
@@ -50,6 +58,12 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "c5b9b76ac2537a", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "e6e20c23ed2328", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Maps <no-reply@maps.alexedwards.net>", "SMTP sender")
 
 	flag.Parse()
 
@@ -67,6 +81,7 @@ func main() {
 		Config: cfg,
 		Logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	err = app.serve()
