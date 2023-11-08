@@ -27,12 +27,23 @@ func (app *application) serve() error {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		s := <-quit
 
-		app.Logger.PrintInfo("shutting down server", map[string]string{
+		app.Logger.PrintInfo("caught signal", map[string]string{
 			"signal": s.String(),
 		})
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		shutdownError <- srv.Shutdown(ctx)
+
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+
+		app.Logger.PrintInfo("completing background tasks", map[string]string{
+			"addr": srv.Addr,
+		})
+
+		app.wg.Wait()
+		shutdownError <- nil
 	}()
 
 	app.Logger.PrintInfo("starting server", map[string]string{

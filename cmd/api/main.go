@@ -7,6 +7,7 @@ import (
 	"maps.alexedwards.net/internal/data"
 	"maps.alexedwards.net/internal/jsonlog"
 	"maps.alexedwards.net/internal/mailer"
+	"sync"
 
 	"flag"
 	"os"
@@ -43,6 +44,7 @@ type application struct {
 	Logger *jsonlog.Logger
 	models data.Models
 	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
